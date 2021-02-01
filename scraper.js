@@ -1,4 +1,3 @@
-// taken from https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API/Using_Screen_Capture
 async function startCapture(displayMediaOptions) {
     let captureStream = null;
 
@@ -22,8 +21,6 @@ function dumpOptionsInfo(videoElem) {
     console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
     console.info(JSON.stringify(audioTrack.getConstraints(), null, 2));
 }
-
-// end portion taken from Mozilla Developer on Using_Screen_Capture
 
 async function getCapturing() {
     // set up capture and start
@@ -70,13 +67,13 @@ async function getCapturing() {
         document.body.appendChild(a);
         a.style = "display: none";
         a.href = url;
-        a.download = "test.mp4";
+        a.download = "test.mkv";
         a.click();
         window.URL.revokeObjectURL(url);
     }
 
     function stopCapture(event){
-        //mediaRecorder.stop()
+        mediaRecorder.stop()
         document.getElementById("video").srcObject.getTracks().forEach(track => track.stop());
         document.getElementById("video").srcObject = null;
     }
@@ -84,6 +81,11 @@ async function getCapturing() {
     const stopElem = document.getElementById("stop");
     stopElem.addEventListener("click", function(evt) {
       stopCapture();
+    }, false);
+
+    // if you click the Chrome "stop" button, still save media
+    capture.addEventListener("inactive", function(evt) {
+        stopCapture();
     }, false);
 }
 
