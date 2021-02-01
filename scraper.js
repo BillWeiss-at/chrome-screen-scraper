@@ -39,9 +39,18 @@ async function getCapturing() {
 
     // set up recording and, hopefully, get streaming?
     var recordedChunks = [];
-    var recordingOptions = {
-        mimeType: "video/x-matroska;codecs=avc1"
-    };
+    var recordingOptions;
+    if (MediaRecorder.isTypeSupported('video/x-matroska;codecs=avc1')) {
+        recordingOptions = { mimeType: 'video/x-matroska;codecs=avc1' };
+    } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+        recordingOptions = { mimeType: 'video/webm;codecs=vp9' };
+    } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+        recordingOptions = { mimeType: 'video/webm;codecs=vp8' };
+    } else {
+        console.log("Can't find a supported mime type :(");
+        return;
+    }
+
     mediaRecorder = new MediaRecorder(capture, recordingOptions);
 
     mediaRecorder.ondataavailable = handleDataAvailable;
