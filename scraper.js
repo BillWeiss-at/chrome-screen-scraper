@@ -84,6 +84,7 @@ async function getCapturing() {
     }, false);
 
     // if you click the Chrome "stop" button, still save media
+    // you'll get an error from mediaRecorder.stop but it's fine
     capture.addEventListener("inactive", function(evt) {
         stopCapture();
     }, false);
