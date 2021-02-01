@@ -1,12 +1,20 @@
 <html>
   <head>
     <title>Screen Scraper test page</title>
+    <style>
+    #video {
+      border: 1px solid #999;
+      width: 98%;
+    }
+    </style>
   </head>
 
   <body>
-    <script src="scraper.js"></script>
     <p>
-    Just <a href="#theresNoHereHere" onclick="getCapturing()">click here</a> to get started.
+    <button id="start">Start Capture</button>&nbsp;
+    <button id="stop">Stop Capture</button>
     </p>
+    <video id="video" autoplay></video>
+    <script src="scraper.js"></script>
   </body>
 </html>

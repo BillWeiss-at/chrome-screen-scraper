@@ -1,32 +1,93 @@
 // taken from https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API/Using_Screen_Capture
 async function startCapture(displayMediaOptions) {
-  let captureStream = null;
+    let captureStream = null;
 
-  try {
-    captureStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-  } catch(err) {
-    console.error("Error: " + err);
-  }
-  return captureStream;
+    try {
+        captureStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+        document.getElementById("video").srcObject = captureStream;
+    } catch(err) {
+        console.error("Error: " + err);
+    }
+    return captureStream;
 }
 
-function dumpOptionsInfo() {
-  const videoTrack = videoElem.srcObject.getVideoTracks()[0];
+function dumpOptionsInfo(videoElem) {
+    const videoTrack = videoElem.getVideoTracks()[0];
+    const audioTrack = videoElem.getAudioTracks()[0];
 
-  console.info("Track settings:");
-  console.info(JSON.stringify(videoTrack.getSettings(), null, 2));
-  console.info("Track constraints:");
-  console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
+    console.info("Track settings:");
+    console.info(JSON.stringify(videoTrack.getSettings(), null, 2));
+    console.info(JSON.stringify(audioTrack.getSettings(), null, 2));
+    console.info("Track constraints:");
+    console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
+    console.info(JSON.stringify(audioTrack.getConstraints(), null, 2));
 }
 
 // end portion taken from Mozilla Developer on Using_Screen_Capture
 
 async function getCapturing() {
-  options = {
-    video: true,
-    audio: true
-  }
-  capture = startCapture(options);
-  dumpOptionsInfo();
+    // set up capture and start
+    var captureOptions = {
+        video: {
+            cursor: "never"
+        },
+        audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            sampleRate: 44100
+        }
+    };
+    capture = await startCapture(captureOptions);
+    dumpOptionsInfo(capture);
+
+    // set up recording and, hopefully, get streaming?
+    var recordedChunks = [];
+    var recordingOptions = {
+        mimeType: "video/webm; codecs=h264"
+    };
+    mediaRecorder = new MediaRecorder(capture, recordingOptions);
+
+    mediaRecorder.ondataavailable = handleDataAvailable;
+    mediaRecorder.start();
+
+    function handleDataAvailable(event) {
+        console.log("data-available");
+        if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+            console.log(recordedChunks);
+            download();
+        } else {
+            console.log("Not sure what to do here, idk");
+        }
+    }
+
+    function download() {
+        var blob = new Blob(recordedChunks, {
+            type: "video/mp4"
+        });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        document.body.appendChild(a);
+        a.style = "display: none";
+        a.href = url;
+        a.download = "test.mp4";
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    function stopCapture(event){
+        //mediaRecorder.stop()
+        document.getElementById("video").srcObject.getTracks().forEach(track => track.stop());
+        document.getElementById("video").srcObject = null;
+    }
+
+    const stopElem = document.getElementById("stop");
+    stopElem.addEventListener("click", function(evt) {
+      stopCapture();
+    }, false);
 }
 
+const startElem = document.getElementById("start");
+startElem.addEventListener("click", function(evt) {
+  getCapturing();
+}, false);
