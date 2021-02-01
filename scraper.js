@@ -40,7 +40,7 @@ async function getCapturing() {
     // set up recording and, hopefully, get streaming?
     var recordedChunks = [];
     var recordingOptions = {
-        mimeType: "video/webm; codecs=h264"
+        mimeType: "video/x-matroska;codecs=avc1"
     };
     mediaRecorder = new MediaRecorder(capture, recordingOptions);
 
@@ -60,7 +60,7 @@ async function getCapturing() {
 
     function download() {
         var blob = new Blob(recordedChunks, {
-            type: "video/mp4"
+            type: "video/x-mastroska"
         });
         var url = URL.createObjectURL(blob);
         var a = document.createElement("a");
