@@ -54,55 +54,47 @@ async function getCapturing() {
 
     mediaRecorder = new MediaRecorder(capture, recordingOptions);
 
-    mediaRecorder.ondataavailable = handleDataAvailable;
+    var ext = mediaRecorder.mimeType.split(';')[0].split('/')[1]
+    if (ext == "x-matroska" ) { ext = "mkv"; }
+
+    const { readable, writable } = new TransformStream({
+        transform: (chunk, ctrl) => chunk.arrayBuffer().then(
+            b => ctrl.enqueue(new Uint8Array(b))
+        )
+    });
+    const writer = writable.getWriter();
+    readable.pipeTo(streamSaver.createWriteStream('test.' + ext));
+    document.getElementById("stop").onclick = event => {
+        videoElem = document.getElementById("video").srcObject
+        let tracks = [
+            ...videoElem.getAudioTracks(),
+            ...videoElem.getVideoTracks()
+        ]
+        for (const track of tracks) track.stop();
+
+        if (mediaRecorder.state != "inactive") { mediaRecorder.stop() }
+
+        setTimeout(() => {
+            writer.ready.then(() => {
+                writer.close().catch((err) => {
+                    // sometimes the stream is closed by the time we get
+                    // here. I don't know, it's fine.
+                });
+            }).catch((err) => {
+                console.log("Stream error:", err);
+            });
+        }, 1000 );
+    }
+
+    mediaRecorder.ondataavailable = evt => writer.write(evt.data);
     mediaRecorder.start();
 
-    const ext = mediaRecorder.mimeType.split(';')[0].split('/')[1]
-
-    function handleDataAvailable(event) {
-        console.log("data-available");
-        if (event.data.size > 0) {
-            recordedChunks.push(event.data);
-            console.log(recordedChunks);
-            download();
-        } else {
-            console.log("Not sure what to do here, idk");
-        }
-    }
-
-    function download() {
-        var blob = new Blob(recordedChunks, {
-            type: mediaRecorder.mimeType
-        });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        document.body.appendChild(a);
-        a.style = "display: none";
-        a.href = url;
-        a.download = "test." + ext;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    }
-
-    function stopCapture(event){
-        mediaRecorder.stop()
-        document.getElementById("video").srcObject.getTracks().forEach(track => track.stop());
-        document.getElementById("video").srcObject = null;
-    }
-
-    const stopElem = document.getElementById("stop");
-    stopElem.addEventListener("click", function(evt) {
-      stopCapture();
-    }, false);
-
     // if you click the Chrome "stop" button, still save media
-    // you'll get an error from mediaRecorder.stop but it's fine
     capture.addEventListener("inactive", function(evt) {
-        stopCapture();
+        document.getElementById("stop").click();
     }, false);
 }
 
-const startElem = document.getElementById("start");
-startElem.addEventListener("click", function(evt) {
+const startElem = document.getElementById("start").onclick = event => {
   getCapturing();
-}, false);
+}
