@@ -12,14 +12,15 @@ async function startCapture(displayMediaOptions) {
 
 function dumpOptionsInfo(videoElem) {
     const videoTrack = videoElem.getVideoTracks()[0];
-    const audioTrack = videoElem.getAudioTracks()[0];
 
     console.info("Track settings:");
     console.info(JSON.stringify(videoTrack.getSettings(), null, 2));
-    console.info(JSON.stringify(audioTrack.getSettings(), null, 2));
-    console.info("Track constraints:");
-    console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
-    console.info(JSON.stringify(audioTrack.getConstraints(), null, 2));
+    if (videoElem.getAudioTracks().length > 0) {
+        audioTrack = videoElem.getAudioTracks()[0];
+        console.info(JSON.stringify(audioTrack.getSettings(), null, 2));
+    } else {
+        console.info("No audio track found");
+    }
 }
 
 async function getCapturing() {
