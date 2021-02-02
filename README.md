@@ -6,6 +6,10 @@ Streaming to a server to save is acceptable but not ideal. The goal is no
 browser extensions, but using a Javascript shim is acceptable if needed. User
 prompting is totally ok for this, it isn't intended as a stealthy capture.
 
+This requires https://github.com/jimmywarting/StreamSaver.js for file saving.
+The current version of the javascript is checked into this repo so you don't
+have to mess with package managers or anything.
+
 ## References
 
 * https://developer.chrome.com/docs/extensions/reference/tabCapture/ -
@@ -16,6 +20,4 @@ prompting is totally ok for this, it isn't intended as a stealthy capture.
   Mozilla docs on using `getDisplayMedia`
 * https://w.kast.live/ - site that does video capture. Bill's used this thing a lot,
   inspired the project.
-* https://www.twilio.com/docs/video/screen-capture-chrome - Twillio javascript
-  library to do screen capturing
 
