@@ -57,6 +57,8 @@ async function getCapturing() {
     mediaRecorder.ondataavailable = handleDataAvailable;
     mediaRecorder.start();
 
+    const ext = mediaRecorder.mimeType.split(';')[0].split('/')[1]
+
     function handleDataAvailable(event) {
         console.log("data-available");
         if (event.data.size > 0) {
@@ -70,14 +72,14 @@ async function getCapturing() {
 
     function download() {
         var blob = new Blob(recordedChunks, {
-            type: "video/x-mastroska"
+            type: mediaRecorder.mimeType
         });
         var url = URL.createObjectURL(blob);
         var a = document.createElement("a");
         document.body.appendChild(a);
         a.style = "display: none";
         a.href = url;
-        a.download = "test.mkv";
+        a.download = "test." + ext;
         a.click();
         window.URL.revokeObjectURL(url);
     }
